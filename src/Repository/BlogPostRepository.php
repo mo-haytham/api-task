@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\BlogPost;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
@@ -47,32 +48,38 @@ class BlogPostRepository extends ServiceEntityRepository
         }
     }
 
-    // /**
-    //  * @return BlogPost[] Returns an array of BlogPost objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function getAll(): array
     {
-        return $this->createQueryBuilder('b')
-            ->andWhere('b.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('b.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+        $queryBuilder = $this->createQueryBuilder('b');
 
-    /*
-    public function findOneBySomeField($value): ?BlogPost
-    {
-        return $this->createQueryBuilder('b')
-            ->andWhere('b.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        $currentDate = new DateTime();
+
+        $queryBuilder
+            ->andWhere($queryBuilder->expr()->lt('b.publishedAt', ':currentDate'))
+            ->andWhere($queryBuilder->expr()->isNull('b.deletedAt'))
+            ->setParameter('currentDate', $currentDate);
+
+        $blogPosts = $queryBuilder->getQuery()->getResult();
+
+        return $blogPosts;
     }
-    */
+
+    public function getAllInArray(): array
+    {
+        $blogPosts = $this->getAll();
+
+        $blogPostArray = $this->collectionToArry($blogPosts);
+
+        return $blogPostArray;
+    }
+
+    private function collectionToArry($collection): array
+    {
+        $returnArray = [];
+
+        foreach ($collection as $item) {
+            array_push($returnArray, $item->toArray());
+        }
+        return $returnArray;
+    }
 }

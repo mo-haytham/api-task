@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\BlogPostRepository;
+use DateTime;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -11,6 +11,11 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class BlogPost
 {
+    public function __construct()
+    {
+        $this->setCreatedAt(new DateTime());
+    }
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -106,5 +111,14 @@ class BlogPost
         $this->createdAt = $createdAt;
 
         return $this;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'title' => $this->getTitle(),
+            'body' => $this->getBody(),
+            'publishedAt' => $this->getPublishedAt(),
+        ];
     }
 }
